@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mecparts/helpers/user_pref.dart';
-import 'package:mecparts/models/theme_model.dart';
 import 'package:mecparts/bloc/theme_provider.dart';
 import 'package:mecparts/bloc/theme_terminal.dart';
+import 'package:mecparts/helpers/user_pref.dart';
+import 'package:mecparts/models/theme_model.dart';
 import 'package:mecparts/ui/empezar_page.dart';
 import 'package:mecparts/ui/maquinas_page.dart';
 import 'package:mecparts/ui/operarios_page.dart';
+import 'package:mecparts/ui/partes_page.dart';
 import 'package:mecparts/ui/prefs_page.dart';
 import 'package:mecparts/ui/recientes_page.dart';
 
@@ -90,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 '/recientes': (BuildContext context) => RecientesPage(),
                 '/operarios': (BuildContext context) => OperariosPage(),
                 '/maquinas': (BuildContext context) => MaquinasPage(),
+                '/partes': (BuildContext context) => PartesPage(),
               },
             );
           }

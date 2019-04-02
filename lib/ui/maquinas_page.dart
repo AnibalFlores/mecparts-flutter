@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mecparts/helpers/globals_singleton.dart';
 import 'package:mecparts/helpers/user_pref.dart';
 
 class MaquinasPage extends StatefulWidget {
@@ -11,6 +12,7 @@ class MaquinasPage extends StatefulWidget {
 
 class _MaqsPageState extends State<MaquinasPage> {
   UserPrefs prefs = new UserPrefs();
+  Globals globals = new Globals();
   String url;
   List data;
   // Function to get the JSON data
@@ -70,7 +72,10 @@ class _MaqsPageState extends State<MaquinasPage> {
                     child: new FlatButton(
                       color: Colors.amber,
                       onPressed: () {
-                        print(data[index]['id']);
+                        // print(data[index]['id']);
+                        globals.maquinaId = data[index]['id'];
+                        globals.maquinaName = data[index]['nombre'];
+                        globals.esmaquina = data[index]['tipo'] == 'Máquina';
                         Navigator.of(context).pushNamed('/operarios');
                       },
                       child: Text(
