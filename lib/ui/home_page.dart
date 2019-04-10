@@ -4,8 +4,14 @@ import 'package:mecparts/bloc/theme_terminal.dart';
 import 'package:mecparts/helpers/user_pref.dart';
 import 'package:mecparts/models/theme_model.dart';
 import 'package:mecparts/ui/empezar_page.dart';
+import 'package:mecparts/ui/informe_page.dart';
 import 'package:mecparts/ui/maquinas_page.dart';
+import 'package:mecparts/ui/mecanizando_page.dart';
+import 'package:mecparts/ui/notas_page.dart';
+import 'package:mecparts/ui/nroorden_page.dart';
+import 'package:mecparts/ui/operando_page.dart';
 import 'package:mecparts/ui/operarios_page.dart';
+import 'package:mecparts/ui/pap_page.dart';
 import 'package:mecparts/ui/partes_page.dart';
 import 'package:mecparts/ui/prefs_page.dart';
 import 'package:mecparts/ui/recientes_page.dart';
@@ -43,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {});
       _terminal.setTheme.add(ThemeModel.getTheme(themename ?? 'claro'));
     });
+
     super.initState();
     // fijarinit();
   }
@@ -92,6 +99,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 '/operarios': (BuildContext context) => OperariosPage(),
                 '/maquinas': (BuildContext context) => MaquinasPage(),
                 '/partes': (BuildContext context) => PartesPage(),
+                '/nroorden': (BuildContext context) => NroOrdenPage(),
+                '/pap': (BuildContext context) => PapPage(),
+                '/operando': (BuildContext context) => OperandoPage(),
+                '/mecanizando': (BuildContext context) => MecanizandoPage(),
+                '/informe': (BuildContext context) => InformePage(),
+                '/observaciones': (BuildContext context) => NotasPage(),
               },
             );
           }

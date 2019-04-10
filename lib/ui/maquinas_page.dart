@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mecparts/helpers/data_base.dart';
 import 'package:mecparts/helpers/globals_singleton.dart';
 import 'package:mecparts/helpers/user_pref.dart';
 
@@ -11,16 +12,21 @@ class MaquinasPage extends StatefulWidget {
 }
 
 class _MaqsPageState extends State<MaquinasPage> {
+
+  // TODO pasar todo esto a bloc
   UserPrefs prefs = new UserPrefs();
+  DbHelper db = new DbHelper();
   Globals globals = new Globals();
   String url;
+  String _terminal;
   List data;
-  // Function to get the JSON data
+  String ruta = '/operarios';
 
+  // Function to get the JSON data
   Future<String> getJSONData() async {
     var response = await http.get(
         // Encode the url
-        Uri.encodeFull(url + '/api/maquinas/'),
+        Uri.encodeFull(url + '/api/maquinasporterminal/' + _terminal),
         // Only accept JSON response
         headers: {"Accept": "application/json"});
 
@@ -43,13 +49,24 @@ class _MaqsPageState extends State<MaquinasPage> {
   @override
   void initState() {
     super.initState();
-    prefs.getUrl().then((S) {
-      url = S;
-      // Call the getJSONData() method when the app initializes
-      this.getJSONData();
+
+    db.getOperarios().then((ope) {
+    if (ope == null || ope.length == 0)
+    { ruta ='/operarios';}
+    else {ruta ='/recientes';}
+    });
+
+    prefs.getNroTerminal().then((nro) {
+      _terminal = nro.toString();
+      prefs.getUrl().then((S) {
+        url = S;
+        // Call the getJSONData() method when the app initializes
+        this.getJSONData();
+      });
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       /*appBar: new AppBar(
@@ -62,6 +79,15 @@ class _MaqsPageState extends State<MaquinasPage> {
           itemCount: data == null ? 0 : data.length,
           itemBuilder: (BuildContext context, int index) {
             return new Container(
+              decoration: BoxDecoration(
+                border: new Border(
+                    bottom: new BorderSide(
+                        color: Theme.of(context).dividerColor,
+                        width: 2,
+                        style: BorderStyle.solid
+                    )),
+
+              ),
               child: new Center(
                   child: new Column(
                 // Stretch the cards in horizontal axis
@@ -76,7 +102,9 @@ class _MaqsPageState extends State<MaquinasPage> {
                         globals.maquinaId = data[index]['id'];
                         globals.maquinaName = data[index]['nombre'];
                         globals.esmaquina = data[index]['tipo'] == 'Máquina';
-                        Navigator.of(context).pushNamed('/operarios');
+                        globals.espap = data[index]['pap'];
+                        globals.esaterminar = data[index]['aterminar'];
+                        Navigator.of(context).pushNamed(ruta);
                       },
                       child: Text(
                         data[index]['nombre'],

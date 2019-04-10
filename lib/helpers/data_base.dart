@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:mecparts/models/operario_model.dart';
 
+import 'package:mecparts/models/operario_model.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+
+// BASE DE DATOS LOCAL
 // Docs armar las querys -> https://sqlite.org/lang.html
 
 class DbHelper {
@@ -37,7 +39,7 @@ class DbHelper {
 
   void _onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $tableOperario ($columnId INTEGER PRIMARY KEY AUTOINCREMENT, $columnNombre TEXT, $columnApellido TEXT, $columnIngreso DATETIME');
+        'CREATE TABLE $tableOperario ($columnId INTEGER PRIMARY KEY, $columnNombre TEXT, $columnApellido TEXT, $columnIngreso DATETIME)');
   }
 
   Future<int> deleteOperario(int id) async {
@@ -60,35 +62,32 @@ class DbHelper {
 
   // Este método lo llamamos cada vez que tengamos un ingreso
   // confirmado por por la respuesta ok del server por alta de labor
-  void saveOperario(Operario operario) async {
+  Future saveOperario(Operario operario) async {
     var dbClient = await db;
+    String _timestamp = operario.ingreso.toIso8601String();
     await dbClient.transaction((txn) async {
-      return await txn.rawInsert(
-          'INSERT INTO $tableOperario ($columnNombre, $columnApellido, $columnIngreso VALUES(\'${operario.nombre}\', \'${operario.apellido}\', datetime(\'now\')');
+      await txn.rawQuery(
+          'REPLACE INTO $tableOperario ($columnId, $columnNombre, $columnApellido, $columnIngreso) VALUES (${operario.id}, \'${operario.nombre}\', \'${operario.apellido}\', datetime(\'$_timestamp\'))');
     });
   }
 
   // la idea es que se listen alfabeticamente los ultimos 3 o 4 operarios
   // distintos con ingresos más recientes en el terminal
 
-  Future<List<Operario>> getOperarios() async {
+  Future<List> getOperarios() async {
     var dbClient = await db;
-    List<Map> list = await dbClient.rawQuery(
+
+    return await dbClient.rawQuery(
         'SELECT * FROM (SELECT DISTINCT * FROM $tableOperario ORDER BY $columnIngreso DESC LIMIT 4) ORDER BY $columnApellido, $columnNombre ASC');
 
-    List<Operario> operarios = List();
-
-    for (int i = 0; i < list.length; i++) {
-      operarios.add(Operario(list[i]['id'], list[i]['nombre'],
-          list[i]['apellido'], list[i]['ingreso']));
+    /*for (int i = 0; i < lista.length; i++) {
+      operarios.add(new Operario(lista[i]['id'], lista[i]['nombre'],
+          lista[i]['apellido'], DateTime.parse(lista[i]['ingreso'])));
     }
-
     // Con esto deberiamos tener un vaciado automático para quedarnos solo con los últimos 6 distintos
     int count = await dbClient.rawDelete(
-        'DELETE * FROM $tableOperario WHERE NOT IN (SELECT DISTINCT * FROM $tableOperario ORDER BY $columnIngreso DESC LIMIT 6)');
-
+        'DELETE FROM $tableOperario WHERE id NOT IN (SELECT DISTINCT id FROM $tableOperario ORDER BY $columnIngreso DESC LIMIT 6)');
     print('borrados: $count');
-
-    return operarios;
+    return lista;);*/
   }
 }

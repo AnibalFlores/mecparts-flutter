@@ -3,8 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mecparts/helpers/data_base.dart';
 import 'package:mecparts/helpers/globals_singleton.dart';
 import 'package:mecparts/helpers/user_pref.dart';
+import 'package:mecparts/models/operario_model.dart';
 
 enum ConfirmAction { CANCEL, ACCEPT }
 
@@ -13,10 +15,12 @@ class OperariosPage extends StatefulWidget {
 }
 
 class _OperPageState extends State<OperariosPage> {
+  // TODO Pasar a bloc
   UserPrefs prefs = new UserPrefs();
   Globals globals = new Globals();
   String url;
   List data;
+  DbHelper db = new DbHelper();
 
   // Dialogo para confirmar seleccion de maquina y usuario
 
@@ -27,30 +31,37 @@ class _OperPageState extends State<OperariosPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirma datos?'),
-          content: Text(globals.getMensaje(),
+          content: Text(
+            globals.getMensaje(),
             textScaleFactor: 2,
             style: TextStyle(
-                fontFamily: 'Lato',
-                fontSize: 12.0,
-                color: Colors.black),),
+              fontFamily: 'Lato',
+              fontSize: 12.0,
+            ),
+          ),
           actions: <Widget>[
             FlatButton(
-              child: const Text('Cancelar',
+              child: const Text(
+                'Cancelar',
                 textScaleFactor: 2,
                 style: TextStyle(
-                    fontFamily: 'Lato',
-                    fontSize: 14.0,
-                    color: Colors.black),),
+                  fontFamily: 'Lato',
+                  fontSize: 14.0,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(ConfirmAction.CANCEL);
               },
             ),
             FlatButton(
-              child: const Text('Aceptar',textScaleFactor: 2,
+              child: const Text(
+                'Aceptar',
+                textScaleFactor: 2,
                 style: TextStyle(
-                    fontFamily: 'Lato',
-                    fontSize: 14.0,
-                    color: Colors.black),),
+                  fontFamily: 'Lato',
+                  fontSize: 14.0,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(ConfirmAction.ACCEPT);
               },
@@ -93,7 +104,7 @@ class _OperPageState extends State<OperariosPage> {
       this.getJSONData();
     });
   }
-
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       /*appBar: new AppBar(
@@ -105,7 +116,15 @@ class _OperPageState extends State<OperariosPage> {
           padding: EdgeInsets.all(60.0),
           itemCount: data == null ? 0 : data.length,
           itemBuilder: (BuildContext context, int index) {
-            return new Container(
+            return new Container( decoration: BoxDecoration(
+              border: new Border(
+                  bottom: new BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 2,
+                      style: BorderStyle.solid
+                  )),
+
+            ),
               child: new Center(
                   child: new Column(
                 // Stretch the cards in horizontal axis
@@ -121,9 +140,15 @@ class _OperPageState extends State<OperariosPage> {
                         globals.operarioName = data[index]['apellido'] +
                             ", " +
                             data[index]['nombre'];
-                        final ConfirmAction action = await _asyncConfirmDialog(context);
-                        if ( action == ConfirmAction.ACCEPT ) {
-                          Navigator.of(context).pushNamed('/partes');
+                        final ConfirmAction action =
+                            await _asyncConfirmDialog(context);
+                        if (action == ConfirmAction.ACCEPT) {
+                          await db.saveOperario(new Operario(
+                              data[index]['id'],
+                              data[index]['nombre'],
+                              data[index]['apellido'],
+                              new DateTime.now()));
+                          Navigator.of(context).pushReplacementNamed('/partes');
                         } else {
                           print('no dialoga $action');
                         }

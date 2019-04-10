@@ -10,24 +10,30 @@ class PrefsPage extends StatefulWidget {
 
 class _PrefsPageState extends State<PrefsPage> {
   final _formKey = GlobalKey<FormState>();
-  ThemeTerminal _terminal;
+  //ThemeTerminal _terminal;
   UserPrefs prefs = UserPrefs();
   int nroterminal;
   String url;
-
+  String _tema;
   bool luz;
 
+  @override
   void initState() {
-    _terminal = ThemeTerminal();
-
-    prefs.getTheme().then((tema) {
-      luz = ('claro' == tema);
-    });
-    prefs.getUrl().then((s){ url = s;});
-
-    prefs.getNroTerminal().then((n){nroterminal = n;});
-
     super.initState();
+    prefs.getTheme().then((t) {
+      _tema = t;
+      luz = ('claro' == _tema);
+    });
+
+    prefs.getUrl().then((s) {
+      url = s;
+    });
+
+    prefs.getNroTerminal().then((n) {
+      nroterminal = n;
+    });
+
+
   }
 
   @override
@@ -54,7 +60,7 @@ class _PrefsPageState extends State<PrefsPage> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: <Widget>[
                               new TextFormField(
-                                initialValue: nroterminal.toString(),
+                                initialValue: nroterminal==null? "" : nroterminal.toString(),
                                 decoration: new InputDecoration(
                                     labelText: "Ingrese el número de terminal"),
                                 keyboardType: TextInputType.number,
@@ -66,11 +72,13 @@ class _PrefsPageState extends State<PrefsPage> {
                                 validator: (value) {
                                   if (value.isEmpty) {
                                     return 'Por favor ingrese un número de terminal';
+                                  } else if (int.parse(value) <= 0) {
+                                    return 'El el número de terminal debe ser mayor a cero';
                                   }
                                 },
                               ),
                               new TextFormField(
-                                initialValue: url,
+                                initialValue: url==null?"http://": url,
                                 decoration: new InputDecoration(
                                     labelText: "Ingrese la Url del server"),
                                 keyboardType: TextInputType.url,
@@ -80,14 +88,14 @@ class _PrefsPageState extends State<PrefsPage> {
                                   // code when the user saves the form.
                                 },
                                 validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Por favor ingrese una url para el servidor';
+                                  if (value.isEmpty || value == 'http://') {
+                                    return 'Por favor ingrese una url para el servidor. Ej.: http://192.168.0.100:2345';
                                   }
                                 },
                               ),
                               Row(
                                 children: <Widget>[
-                                  new Text('LUZ'),
+                                  new Text('Tema ' + _tema),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16.0),
@@ -112,6 +120,7 @@ class _PrefsPageState extends State<PrefsPage> {
                                       onChanged: (bool value) {
                                         setState(() {
                                           luz = value;
+                                          _tema = luz?'claro':'oscuro';
                                         });
 
                                         if (value) {
@@ -121,7 +130,6 @@ class _PrefsPageState extends State<PrefsPage> {
                                           terminal.updateTheme(
                                               ThemeModel.getTheme('oscuro'));
                                         }
-                                        print(value);
                                       },
                                     ),
                                   ),
@@ -129,27 +137,27 @@ class _PrefsPageState extends State<PrefsPage> {
                               ),
                               Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0),
+                                      vertical: 20.0, horizontal: 20.0),
                                   child: RaisedButton(
+                                      child: Text('Guardar',
+                                          style: new TextStyle(
+                                              fontSize: 28.0,
+                                              color: Colors.white)),
+                                      padding: const EdgeInsets.all(15.0),
+                                      shape: new RoundedRectangleBorder(
+                                          borderRadius:
+                                              new BorderRadius.circular(30.0)),
                                       onPressed: () {
                                         if (_formKey.currentState.validate()) {
                                           // If the form is valid, we want to show a Snackbar
                                           Scaffold.of(context).showSnackBar(
-                                              SnackBar(
+                                              SnackBar(action: SnackBarAction(textColor: Colors.white, disabledTextColor: Colors.orange,
+                                                  label: 'OK', onPressed: Scaffold.of(context).hideCurrentSnackBar),
                                                   content: Text(
-                                                      'Procesando Datos')));
+                                                      'Guardando preferencias...')));
                                           _formKey.currentState.save();
-
                                         }
-                                      },
-                                      child: Text('Guardar',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              color: Colors.white)),
-                                      padding: const EdgeInsets.all(5.0),
-                                      shape: new RoundedRectangleBorder(
-                                          borderRadius:
-                                              new BorderRadius.circular(18.0))))
+                                      }))
                             ])));
                   } else {
                     return Container(child: new Text('No hay datos'));
