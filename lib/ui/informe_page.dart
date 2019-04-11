@@ -79,7 +79,6 @@ class _InformePageState extends State<InformePage> {
   }
 
   Future salvaLabor() async {
-
     if (globals.nroLabor != 0) {
       var response = await http.put(
           Uri.encodeFull(
@@ -88,15 +87,20 @@ class _InformePageState extends State<InformePage> {
             "Accept": "application/json"
           },
           body: {
+            "terminalid": globals.terminal.toString(),
             "nombre": globals.maquinaName,
             "operario": globals.operarioName,
             "operarioId": globals.operarioId.toString(),
+            "nroorden": globals.nroOrden.toString(),
+            "parteid": globals.parteId.toString(),
+            "parte": globals.parteCodigo,
             "final": DateTime.now().toIso8601String(),
             "aptas": aptas.toString(),
             "rechazos": rechazos.toString(),
-            "terminadas": (_pendientes == Pendientes.terminadas?true:false).toString(),
+            "terminadas": (_pendientes == Pendientes.terminadas ? true : false)
+                .toString(),
             "observacion": globals.nota
-          } );
+          });
     }
     return "Labor cerrada OK";
   }
@@ -185,6 +189,9 @@ class _InformePageState extends State<InformePage> {
                           onSaved: (String value) {
                             aptas = int.parse(value);
                           },
+                          onEditingComplete: () {
+                            calculaTotal();
+                          },
                           validator: (value) {
                             if (value.isEmpty) {
                               return 'Por favor ingrese una cantidad de Aptas';
@@ -202,6 +209,9 @@ class _InformePageState extends State<InformePage> {
                           decoration:
                               new InputDecoration(labelText: "Rechazos"),
                           keyboardType: TextInputType.number,
+                          onEditingComplete: () {
+                            calculaTotal();
+                          },
                           onSaved: (String value) {
                             rechazos = int.parse(value);
                           },
@@ -251,12 +261,17 @@ class _InformePageState extends State<InformePage> {
   }
 
   Widget calculaTotal() {
-    if (total == 0) {
-      return Text("Total: " + total.toString(),
-          style: TextStyle(
-            fontFamily: 'Lato',
-            fontSize: 24.0,
-          ));
+    if (_aptas.text.isNotEmpty && _rechazos.text.isNotEmpty) {
+      FocusScope.of(context).detach();//oculta teclado
+      setState((){total = int.parse(_aptas.text) + int.parse(_rechazos.text);});
+
+      if (total != null) {
+        return Text("Total: " + total.toString(),
+            style: TextStyle(
+              fontFamily: 'Lato',
+              fontSize: 24.0,
+            ));
+      }
     }
   }
 
@@ -264,20 +279,17 @@ class _InformePageState extends State<InformePage> {
     return RaisedButton(
         onPressed: () async {
           if (_formKey.currentState.validate()) {
-
             _formKey.currentState.save();
             await salvaLabor();
             await borraGlobals();
-            Navigator.of(context).pushNamedAndRemoveUntil("/maquinas", ModalRoute.withName("/"));
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil("/maquinas", ModalRoute.withName("/"));
           }
         },
         child: Text('CONFIRMAR',
-            style: new TextStyle(
-                fontSize: 28.0,
-                color: Colors.white)),
+            style: new TextStyle(fontSize: 28.0, color: Colors.white)),
         padding: const EdgeInsets.all(5.0),
         shape: new RoundedRectangleBorder(
-            borderRadius:
-            new BorderRadius.circular(20.0)));
+            borderRadius: new BorderRadius.circular(20.0)));
   }
 }

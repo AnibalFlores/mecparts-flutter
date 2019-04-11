@@ -31,7 +31,7 @@ class _MaqsPageState extends State<MaquinasPage> {
         headers: {"Accept": "application/json"});
 
     // Logs the response body to the console
-    print(response.body);
+    // print(response.body);
 
     // To modify the state of the app, use this method
     setState(() {

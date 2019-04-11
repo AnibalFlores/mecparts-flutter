@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     prefs.getTheme().then((tema) {
       themename = tema;
-      print('Tema actual $tema');
+      // print('Tema actual $tema');
       if (tema == null) _terminal.updateTheme(ThemeModel.getTheme('claro'));
       setState(() {});
       _terminal.setTheme.add(ThemeModel.getTheme(themename ?? 'claro'));

@@ -35,7 +35,7 @@ class _PartsPageState extends State<PartesPage> {
         headers: {"Accept": "application/json"});
 
     // Logs the response body to the console
-    print(response.body);
+    // print(response.body);
 
     // To modify the state of the app, use this method
     setState(() {
@@ -78,7 +78,7 @@ class _PartsPageState extends State<PartesPage> {
       // Call the getJSONData() method when the app initializes
       this.getJSONData();
       this.getLaborId().then((s) async {
-        print(s);
+        // print(s);
         await salvaGlobals();
         // print(s);
         });
@@ -189,7 +189,7 @@ class _PartsPageState extends State<PartesPage> {
                       child: new FlatButton(
                         color: Colors.amber,
                         onPressed: () {
-                          print(data[index]['id']);
+                          // print(data[index]['id']);
                           globals.parteId = data[index]['id'];
                           globals.parteCodigo = data[index]['codigo'];
                           Navigator.of(context).pushNamed('/nroorden');

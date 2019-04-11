@@ -55,7 +55,7 @@ class _EmpezarPageState extends State<EmpezarPage> {
   }
 
   Future checkStatus() async {
-    print(url + "/api/terminalstatus/" + nroterminal.toString());
+    // print(url + "/api/terminalstatus/" + nroterminal.toString());
     http.Response response =
         await http.get(url + "/api/terminalstatus/" + nroterminal.toString());
     if (response.statusCode == HttpStatus.ok) {
@@ -67,7 +67,7 @@ class _EmpezarPageState extends State<EmpezarPage> {
   Future definirRuta() async {
     String _ruta;
     var status = json.decode(await checkStatus());
-    print(status);
+    // print(status);
     // aca no se han confirmado maquina ni operario
     if (status['estado'] == 'Apagado') {
       _ruta = '/maquinas';

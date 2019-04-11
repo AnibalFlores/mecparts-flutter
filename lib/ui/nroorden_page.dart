@@ -33,7 +33,7 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
   }
 
   Future salvaGlobals() async {
-    print(url + '/api/terminalupdate/' + nroterminal.toString());
+    // print(url + '/api/terminalupdate/' + nroterminal.toString());
     var response = await http.put(
         Uri.encodeFull(
             url + '/api/terminalstatusupdate/' + nroterminal.toString()),
@@ -71,7 +71,7 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
     return estado;
   }
 
-  saltaRuta() {
+  saltaRuta() async {
     if (!globals.esmaquina) {
       ruta = '/operando';
     } else {
@@ -79,8 +79,26 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
     }
     if (globals.espap && globals.esmaquina) {
       ruta = '/pap';
+      await salvaEvento();
     }
     Navigator.of(context).pushNamed(ruta);
+  }
+
+  // Guardamos evento PAP el datetime lo pone el server
+  Future salvaEvento() async {
+    if (globals.nroLabor != 0) {
+      var res = await http.post(
+          Uri.encodeFull(
+              url + '/api/eventonuevo/'),
+          headers: {
+            "Accept": "application/json"
+          },
+          body: {
+            "nombre": 'Inicio PAP',
+            "laborid": globals.nroLabor.toString(),
+          } );
+      return res.body;
+    }
   }
 
   @override
