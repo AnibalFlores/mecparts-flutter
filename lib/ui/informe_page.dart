@@ -94,6 +94,7 @@ class _InformePageState extends State<InformePage> {
             "nroorden": globals.nroOrden.toString(),
             "parteid": globals.parteId.toString(),
             "parte": globals.parteCodigo,
+            // Cuando se guarda el final se calculan las duraciones de los eventos con un trigger en postgres
             "final": DateTime.now().toIso8601String(),
             "aptas": aptas.toString(),
             "rechazos": rechazos.toString(),

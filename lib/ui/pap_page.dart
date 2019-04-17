@@ -50,7 +50,7 @@ class PapPage extends StatelessWidget {
             "Accept": "application/json"
           },
           body: {
-            "nombre": 'Mecanizando',
+            "nombre": 'MEC',
             "laborid": globals.nroLabor.toString(),
           } );
       return res.body;

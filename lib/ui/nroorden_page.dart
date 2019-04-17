@@ -74,18 +74,22 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
   saltaRuta() async {
     if (!globals.esmaquina) {
       ruta = '/operando';
+      await salvaEvento('OPE');
     } else {
+      if (globals.espap && globals.esmaquina) {
+        ruta = '/pap';
+        await salvaEvento('PAP');
+      } else{
       ruta = '/mecanizando';
+      await salvaEvento('MEC');
     }
-    if (globals.espap && globals.esmaquina) {
-      ruta = '/pap';
-      await salvaEvento();
     }
+
     Navigator.of(context).pushNamed(ruta);
   }
 
   // Guardamos evento PAP el datetime lo pone el server
-  Future salvaEvento() async {
+  Future salvaEvento(String titulo) async {
     if (globals.nroLabor != 0) {
       var res = await http.post(
           Uri.encodeFull(
@@ -94,7 +98,7 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
             "Accept": "application/json"
           },
           body: {
-            "nombre": 'Inicio PAP',
+            "nombre": titulo,
             "laborid": globals.nroLabor.toString(),
           } );
       return res.body;

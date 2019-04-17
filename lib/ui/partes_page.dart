@@ -54,17 +54,17 @@ class _PartsPageState extends State<PartesPage> {
   // Funcion para crear la labor en el server
   Future<String> getLaborId() async {
     if (globals.nroLabor == 0) {
-    var response = await http.post(Uri.encodeFull(url + '/api/terminalnuevalabor/'),
-        headers: {
-          "Accept": "application/json"
-        },
-        body: {
-          "nombre": globals.maquinaName,
-          "operario": globals.operarioName,
-          "operarioId": globals.operarioId.toString()
-        });
-    var labor = jsonDecode(response.body);
-    globals.nroLabor = labor['id'];}
+      var response = await http
+          .post(Uri.encodeFull(url + '/api/terminalnuevalabor/'), headers: {
+        "Accept": "application/json"
+      }, body: {
+        "nombre": globals.maquinaName,
+        "operario": globals.operarioName,
+        "operarioId": globals.operarioId.toString()
+      });
+      var labor = jsonDecode(response.body);
+      globals.nroLabor = labor['id'];
+    }
     return "Labor iniciada OK: " + globals.nroLabor.toString();
   }
 
@@ -74,37 +74,39 @@ class _PartsPageState extends State<PartesPage> {
     prefs.getUrl().then((S) {
       url = S;
       prefs.getNroTerminal().then((t) {
-      nroterminal = t;
-      // Call the getJSONData() method when the app initializes
-      this.getJSONData();
-      this.getLaborId().then((s) async {
-        // print(s);
-        await salvaGlobals();
-        // print(s);
+        nroterminal = t;
+        // Call the getJSONData() method when the app initializes
+        this.getJSONData();
+        this.getLaborId().then((s) async {
+          // print(s);
+          await salvaGlobals();
+          // print(s);
         });
       });
     });
   }
 
   Future salvaGlobals() async {
-    print(url + '/api/terminalupdate/'+ nroterminal.toString());
-    var response = await http.put(Uri.encodeFull(url + '/api/terminalstatusupdate/'+ nroterminal.toString()),
+    print(url + '/api/terminalupdate/' + nroterminal.toString());
+    var response = await http.put(
+        Uri.encodeFull(
+            url + '/api/terminalstatusupdate/' + nroterminal.toString()),
         headers: {
           "Accept": "application/json"
         },
         body: {
-        // aca resguardamos los valores globales o por defecto del terminal
-        "estado" : 'En Espera',
-        "maquinaactual": globals.maquinaId.toString(),
-        "maquinaname": globals.maquinaName,
-        "operarioactual": globals.operarioId.toString(),
-        "operarioname": globals.operarioName,
-        "laboractual" : globals.nroLabor.toString(),
-        /*"parteactual" : globals.parteId.toString(),
+          // aca resguardamos los valores globales o por defecto del terminal
+          "estado": 'En Espera',
+          "maquinaactual": globals.maquinaId.toString(),
+          "maquinaname": globals.maquinaName,
+          "operarioactual": globals.operarioId.toString(),
+          "operarioname": globals.operarioName,
+          "laboractual": globals.nroLabor.toString(),
+          /*"parteactual" : globals.parteId.toString(),
         "partecodigo" : '', // con globals.parteCodigo explota
         "nroordenactual" : globals.nroOrden.toString(),*/
-        "esmaquina" :  globals.esmaquina.toString(),
-        "espap": globals.espap.toString(),
+          "esmaquina": globals.esmaquina.toString(),
+          "espap": globals.espap.toString(),
         });
     return response.body;
   }
@@ -128,43 +130,46 @@ class _PartsPageState extends State<PartesPage> {
 
   Future<bool> _onWillPop() {
     return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('Atención:'),
-        content: new Text('Accion no permitida.\nDatos anteriores ya confirmados.\n'
-            + globals.getMensaje()),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),// cambiar a false para trabar el back
-            child: new Text('ACEPTAR'),
-          ),
-
-        ],
-      ),
-    ) ?? false;
+          context: context,
+          builder: (context) => new AlertDialog(
+                title: new Text('Atención:'),
+                content: new Text(
+                    'Accion no permitida.\nDatos anteriores ya confirmados.\n' +
+                        globals.getMensaje()),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () => Navigator.of(context)
+                        .pop(false), // cambiar a false para trabar el back
+                    child: new Text('ACEPTAR'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: _onWillPop,
       child: new Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
-          automaticallyImplyLeading: false,
-          elevation: 0.0,
-          title: TextField(
-              style: TextStyle(
-                fontFamily: 'Lato',
-                fontSize: 28.0,
-              ),
-              controller: _codigoaBuscar,
-              onEditingComplete: _BusquedaEdit,
-              autofocus: false,
-              decoration: const InputDecoration(
-                hintText: 'Buscar códigos...',
-              )),
+            automaticallyImplyLeading: false,
+            elevation: 0.0,
+            title: TextField(
+                style: TextStyle(
+                  fontFamily: 'Lato',
+                  fontSize: 28.0,
+                ),
+                controller: _codigoaBuscar,
+                onEditingComplete: _BusquedaEdit,
+                autofocus: false,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar códigos...',
+                )),
+            leading: Icon(Icons.search, size: 40.0, color: Colors.black),
+
         ),
         // Create a Listview and load the data when available
         body: new ListView.builder(
@@ -220,7 +225,7 @@ class _PartsPageState extends State<PartesPage> {
                         size: 40.0,
                       )
                     : Icon(
-                        Icons.search,
+                        Icons.help_outline,
                         size: 40.0,
                       ),
                 onPressed: () {
@@ -265,5 +270,4 @@ class _PartsPageState extends State<PartesPage> {
       ),
     );
   }
-
 }
