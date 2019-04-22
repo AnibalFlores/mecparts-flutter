@@ -61,7 +61,7 @@ class DbHelper {
   }
 
   // Este método lo llamamos cada vez que tengamos un ingreso
-  // confirmado por por la respuesta ok del server por alta de labor
+  // confirmado por la respuesta ok del server por usuario activo
   Future saveOperario(Operario operario) async {
     var dbClient = await db;
     String _timestamp = operario.ingreso.toIso8601String();

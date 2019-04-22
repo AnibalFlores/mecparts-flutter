@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mecparts/helpers/data_base.dart';
 import 'package:mecparts/helpers/globals_singleton.dart';
 import 'package:mecparts/models/operario_model.dart';
@@ -13,6 +17,7 @@ class _RecienPageState extends State<RecientesPage> {
   DbHelper db = new DbHelper();
   Globals globals = new Globals();
   List data;
+  String url;
 
   // Dialogo para confirmar seleccion de maquina y usuario
 
@@ -67,6 +72,7 @@ class _RecienPageState extends State<RecientesPage> {
   @override
   void initState() {
     super.initState();
+    url = globals.url;
     db.getOperarios().then((l) {data = l;
     if (data == null || data.length == 0)
     { Navigator.of(context).pushNamed('/operarios');}
@@ -122,7 +128,7 @@ class _RecienPageState extends State<RecientesPage> {
                                         data[index]['nombre'];
                                     final ConfirmAction action =
                                     await _asyncConfirmDialog(context);
-                                    if (action == ConfirmAction.ACCEPT) {
+                                    if (action == ConfirmAction.ACCEPT && await _validaOperario(data[index]['id'])) {
                                       await db.saveOperario(new Operario(
                                           data[index]['id'],
                                           data[index]['nombre'],
@@ -130,7 +136,7 @@ class _RecienPageState extends State<RecientesPage> {
                                           new DateTime.now()));
                                       Navigator.of(context).pushReplacementNamed('/partes');
                                     } else {
-                                      print('no dialoga $action');
+                                      _operarioNoValido();
                                     }
                                   },
                                   child: Text(
@@ -179,4 +185,43 @@ class _RecienPageState extends State<RecientesPage> {
       ),
     );
   }
+
+  Future<bool> _operarioNoValido() {
+    return showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Atención:'),
+        content: new Text(
+            'El operario no es válido.\nSeleccione otro.\n' +
+                globals.getMensaje()),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context)
+                .pop(false), // cambiar a false para trabar el back
+            child: new Text('ACEPTAR'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
+
+Future<bool> _validaOperario(id)  async {
+
+      if (id != 0) {
+        var res = await http.get(
+            Uri.encodeFull(
+                url + '/api/operario/'+ id.toString()),
+            headers: {
+              "Accept": "application/json"
+            });
+        var oper = json.decode(res.body);
+        return oper['activo'] == true;
+      }
+
+    return false;
+  }
 }
+
+
+

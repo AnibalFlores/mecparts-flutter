@@ -193,11 +193,12 @@ class _PartsPageState extends State<PartesPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: new FlatButton(
                         color: Colors.amber,
-                        onPressed: () {
-                          // print(data[index]['id']);
+                        onPressed: () async {
+                          if( await _validaParte(data[index]['id'])){
                           globals.parteId = data[index]['id'];
                           globals.parteCodigo = data[index]['codigo'];
-                          Navigator.of(context).pushNamed('/nroorden');
+                          Navigator.of(context).pushNamed('/nroorden');}
+                          else{_parteNoValida();}
                         },
                         child: Text(
                           data[index]['codigo'],
@@ -254,6 +255,44 @@ class _PartsPageState extends State<PartesPage> {
     FocusScope.of(context).detach(); //oculta teclado
     _limpiar = false;
     _iniciarBusqueda();
+  }
+
+  Future<bool> _parteNoValida() {
+    return showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Atención:'),
+        content: new Text(
+            'El código no es válido.\nSeleccione otro.\n' +
+                globals.getMensaje()),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context)
+                .pop(false), // cambiar a false para trabar el back
+            child: new Text('ACEPTAR'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
+
+  Future<bool> _validaParte(id)  async {
+
+    if (id != 0) {
+      var res = await http.get(
+          Uri.encodeFull(
+              url + '/api/parte/'+ id.toString()),
+          headers: {
+            "Accept": "application/json"
+          });
+      var parte = json.decode(res.body);
+      print(parte);
+      return parte['activa'] == true;
+
+    }
+
+    return false;
   }
 
   void _showToast(BuildContext context) {

@@ -142,7 +142,7 @@ class _OperPageState extends State<OperariosPage> {
                             data[index]['nombre'];
                         final ConfirmAction action =
                             await _asyncConfirmDialog(context);
-                        if (action == ConfirmAction.ACCEPT) {
+                        if (action == ConfirmAction.ACCEPT && await _validaOperario(data[index]['id'])) {
                           await db.saveOperario(new Operario(
                               data[index]['id'],
                               data[index]['nombre'],
@@ -150,7 +150,7 @@ class _OperPageState extends State<OperariosPage> {
                               new DateTime.now()));
                           Navigator.of(context).pushReplacementNamed('/partes');
                         } else {
-                          print('no dialoga $action');
+                          _operarioNoValido();
                         }
                       },
                       child: Text(
@@ -171,4 +171,41 @@ class _OperPageState extends State<OperariosPage> {
           }),
     );
   }
+
+  Future<bool> _operarioNoValido() {
+    return showDialog(
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Atención:'),
+        content: new Text(
+            'El operario no es válido.\nSeleccione otro.\n' +
+                globals.getMensaje()),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context)
+                .pop(false), // cambiar a false para trabar el back
+            child: new Text('ACEPTAR'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
+
+  Future<bool> _validaOperario(id)  async {
+
+    if (id != 0) {
+      var res = await http.get(
+          Uri.encodeFull(
+              url + '/api/operario/'+ id.toString()),
+          headers: {
+            "Accept": "application/json"
+          });
+      var oper = json.decode(res.body);
+      return oper['activo'] == true;
+    }
+
+    return false;
+  }
+
 }
