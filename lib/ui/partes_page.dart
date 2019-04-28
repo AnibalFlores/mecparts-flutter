@@ -64,6 +64,7 @@ class _PartsPageState extends State<PartesPage> {
       });
       var labor = jsonDecode(response.body);
       globals.nroLabor = labor['id'];
+      globals.inicio = DateTime.parse(labor['inicio']);
     }
     return "Labor iniciada OK: " + globals.nroLabor.toString();
   }
@@ -87,7 +88,7 @@ class _PartsPageState extends State<PartesPage> {
   }
 
   Future salvaGlobals() async {
-    print(url + '/api/terminalupdate/' + nroterminal.toString());
+    // print(url + '/api/terminalupdate/' + nroterminal.toString());
     var response = await http.put(
         Uri.encodeFull(
             url + '/api/terminalstatusupdate/' + nroterminal.toString()),
@@ -97,6 +98,7 @@ class _PartsPageState extends State<PartesPage> {
         body: {
           // aca resguardamos los valores globales o por defecto del terminal
           "estado": 'En Espera',
+          "inicio": new DateTime.now().toIso8601String(),
           "maquinaactual": globals.maquinaId.toString(),
           "maquinaname": globals.maquinaName,
           "operarioactual": globals.operarioId.toString(),
@@ -287,7 +289,6 @@ class _PartsPageState extends State<PartesPage> {
             "Accept": "application/json"
           });
       var parte = json.decode(res.body);
-      print(parte);
       return parte['activa'] == true;
 
     }

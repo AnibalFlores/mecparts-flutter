@@ -88,6 +88,7 @@ class _InformePageState extends State<InformePage> {
           },
           body: {
             "terminalid": globals.terminal.toString(),
+            "inicio": globals.inicio.toIso8601String(),
             "nombre": globals.maquinaName,
             "operario": globals.operarioName,
             "operarioId": globals.operarioId.toString(),
