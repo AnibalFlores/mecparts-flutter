@@ -36,7 +36,7 @@ class _EmpezarPageState extends State<EmpezarPage> {
       url = S;
       prefs.getNroTerminal().then((t) async {
         nroterminal = t;
-        ruta = await definirRuta();
+        ruta = await definePath();
       });
     });
   }
@@ -64,8 +64,8 @@ class _EmpezarPageState extends State<EmpezarPage> {
   }
 
 // define la ruta y recupera globales (por si la app se cerro volver al estado en curso)
-  Future definirRuta() async {
-    String _ruta;
+  Future<String> definePath() async {
+    String _ruta = '/maquinas';
     var status = json.decode(await checkStatus());
     // print(status);
     // aca no se han confirmado maquina ni operario
@@ -95,6 +95,12 @@ class _EmpezarPageState extends State<EmpezarPage> {
     globals.operarioId = status['operarioactual'];
     globals.operarioName = status['operarioname'];
     globals.nroLabor = status['laboractual'];
+    globals.iniciolabor = status['iniciolabor'] != null
+        ? DateTime.parse(status['iniciolabor'])
+        : new DateTime.now();
+    globals.inicioevento = status['inicioevento'] != null
+        ? DateTime.parse(status['inicioevento'])
+        : new DateTime.now();
     globals.parteId = status['parteactual'];
     globals.parteCodigo = status['partecodigo'];
     globals.nroOrden = status['nroordenactual'];

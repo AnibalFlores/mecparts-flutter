@@ -150,7 +150,7 @@ class _OperPageState extends State<OperariosPage> {
                               new DateTime.now()));
                           Navigator.of(context).pushReplacementNamed('/partes');
                         } else {
-                          _operarioNoValido();
+                          if (action == ConfirmAction.ACCEPT) _operarioNoValido();
                         }
                       },
                       child: Text(

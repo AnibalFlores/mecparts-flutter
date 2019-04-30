@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mecparts/bloc/theme_provider.dart';
+import 'package:mecparts/bloc/theme_terminal.dart';
 import 'package:mecparts/helpers/globals_singleton.dart';
 import 'package:mecparts/helpers/user_pref.dart';
+import 'package:mecparts/models/theme_model.dart';
 
 enum Pendientes { terminadas, aterminar }
 
@@ -26,6 +29,7 @@ class _InformePageState extends State<InformePage> {
   int nroterminal;
   Pendientes _pendientes = Pendientes.terminadas;
   bool building = true;
+  bool esclaro = true;
 
   @override
   void initState() {
@@ -88,7 +92,7 @@ class _InformePageState extends State<InformePage> {
           },
           body: {
             "terminalid": globals.terminal.toString(),
-            "inicio": globals.inicio.toIso8601String(),
+            "inicio": globals.iniciolabor.toIso8601String(),
             "nombre": globals.maquinaName,
             "operario": globals.operarioName,
             "operarioId": globals.operarioId.toString(),
@@ -146,26 +150,38 @@ class _InformePageState extends State<InformePage> {
     }
   }
 
+  Future _esclaro() async {
+    esclaro = await prefs.getTheme() == 'claro';
+  }
+
   @override
   Widget build(BuildContext context) {
+    ThemeTerminal terminal = ThemeProvider.of(context).terminal;
+    _esclaro();
     return Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
-          leading: new IconButton(
-            icon: new Icon(Icons.settings, size: 30.0),
-            onPressed: () {},
-          ),
-          title: Center(
-              child: Text(
-            'Informe de Producción      ',
-            textScaleFactor: 2,
-            style: TextStyle(
-              fontFamily: 'Lato',
-              fontSize: 14.0,
-            ),
-          )),
-          titleSpacing: 0.0,
-        ),
+            automaticallyImplyLeading: true,
+            title: Center(
+                child: Text(
+              'Informe de Producción      ',
+              textScaleFactor: 2,
+              style: TextStyle(
+                fontFamily: 'Lato',
+                fontSize: 14.0,
+              ),
+            )),
+            titleSpacing: 0.0,
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(esclaro ? Icons.brightness_3 : Icons.wb_sunny),
+                  onPressed: () async {
+                    setState(() {
+                      terminal.updateTheme(
+                          ThemeModel.getTheme(esclaro ? 'oscuro' : 'claro'));
+                      _esclaro();
+                    });
+                  })
+            ]),
         body: Center(
           child: new Container(
               padding: const EdgeInsets.all(20.0),
@@ -264,8 +280,10 @@ class _InformePageState extends State<InformePage> {
 
   Widget calculaTotal() {
     if (_aptas.text.isNotEmpty && _rechazos.text.isNotEmpty) {
-      FocusScope.of(context).detach();//oculta teclado
-      setState((){total = int.parse(_aptas.text) + int.parse(_rechazos.text);});
+      FocusScope.of(context).detach(); //oculta teclado
+      setState(() {
+        total = int.parse(_aptas.text) + int.parse(_rechazos.text);
+      });
 
       if (total != null) {
         return Text("Total: " + total.toString(),

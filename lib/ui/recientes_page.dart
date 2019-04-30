@@ -73,9 +73,11 @@ class _RecienPageState extends State<RecientesPage> {
   void initState() {
     super.initState();
     url = globals.url;
-    db.getOperarios().then((l) {data = l;
-    if (data == null || data.length == 0)
-    { Navigator.of(context).pushNamed('/operarios');}
+    db.getOperarios().then((l) {
+      data = l;
+      if (data == null || data.length == 0) {
+        Navigator.of(context).pushNamed('/operarios');
+      }
     });
   }
 
@@ -88,32 +90,46 @@ class _RecienPageState extends State<RecientesPage> {
       ),*/
       // Create a Listview and load the data when available
       body: FutureBuilder<Object>(
-        future: db.getOperarios(),
-        builder: (context, snapshot) {
-          return Column(
-            //mainAxisSize: MainAxisSize.min,
-            //mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(60.0),
-                  itemCount: data == null ? 0 : data.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return new Container(
-                      decoration: BoxDecoration(
-                        border: new Border(
-                          bottom: new BorderSide(
-                              color: Theme.of(context).dividerColor,
-                              width: 2,
-                              style: BorderStyle.solid
-                          )),
-
-                      ),
-                      child: new Center(
-                          child: new Column(
-
-                            // Stretch the cards in horizontal axis
+          future: db.getOperarios(),
+          builder: (context, snapshot) {
+            return Column(
+              //mainAxisSize: MainAxisSize.min,
+              //mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.all(60.0),
+                    itemCount: data == null ? 0 : data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Dismissible(
+                        key: Key(data[index]['nombre']),
+                        onDismissed: (direction) async {
+                          // data.removeAt(index);
+                          db.deleteOperario(data[index]['id']).then((o) {
+                            db.getOperarios().then((l) {
+                              data = l;
+                              if (data == null || data.length == 0) {
+                                Navigator.of(context).pushNamed('/operarios');
+                              } else {
+                                setState(() {});
+                                Scaffold.of(context).showSnackBar(SnackBar(
+                                    content:
+                                        Text("Usuario borrado de recientes")));
+                              }
+                            });
+                          });
+                        },
+                        child: new Container(
+                          decoration: BoxDecoration(
+                            border: new Border(
+                                bottom: new BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                    width: 2,
+                                    style: BorderStyle.solid)),
+                          ),
+                          child: new Center(
+                              child: new Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
                               Padding(
@@ -123,24 +139,30 @@ class _RecienPageState extends State<RecientesPage> {
                                   onPressed: () async {
                                     // print(data[index]['id']);
                                     globals.operarioId = data[index]['id'];
-                                    globals.operarioName = data[index]['apellido'] +
+                                    globals.operarioName = data[index]
+                                            ['apellido'] +
                                         ", " +
                                         data[index]['nombre'];
                                     final ConfirmAction action =
-                                    await _asyncConfirmDialog(context);
-                                    if (action == ConfirmAction.ACCEPT && await _validaOperario(data[index]['id'])) {
+                                        await _asyncConfirmDialog(context);
+                                    if (action == ConfirmAction.ACCEPT &&
+                                        await _validaOperario(
+                                            data[index]['id'])) {
                                       await db.saveOperario(new Operario(
                                           data[index]['id'],
                                           data[index]['nombre'],
                                           data[index]['apellido'],
                                           new DateTime.now()));
-                                      Navigator.of(context).pushReplacementNamed('/partes');
+                                      Navigator.of(context)
+                                          .pushReplacementNamed('/partes');
                                     } else {
-                                      _operarioNoValido();
+                                      if (action == ConfirmAction.ACCEPT) _operarioNoValido();
                                     }
                                   },
                                   child: Text(
-                                    data[index]['apellido'] + ", " + data[index]['nombre'],
+                                    data[index]['apellido'] +
+                                        ", " +
+                                        data[index]['nombre'],
                                     textScaleFactor: 2,
                                     style: TextStyle(
                                         fontFamily: 'Lato',
@@ -153,75 +175,69 @@ class _RecienPageState extends State<RecientesPage> {
                               ),
                             ],
                           )),
-                    );
+                        ),
+                      );
                     }),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 68.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    new FlatButton(
-                      color: Colors.green,
-                      onPressed: () {
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 68.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      new FlatButton(
+                        color: Colors.green,
+                        onPressed: () {
                           Navigator.of(context).pushNamed('/operarios');
-                      },
-                      child: Text('Soy otro operario',
-                        textScaleFactor: 2,
-                        style: TextStyle(
-                            fontFamily: 'Lato',
-                            fontSize: 16.0,
-                            color: Colors.white),
+                        },
+                        child: Text(
+                          'Soy otro operario',
+                          textScaleFactor: 2,
+                          style: TextStyle(
+                              fontFamily: 'Lato',
+                              fontSize: 16.0,
+                              color: Colors.white),
+                        ),
+                        shape: new StadiumBorder(),
+                        padding: const EdgeInsets.all(10.0),
                       ),
-                      shape: new StadiumBorder(),
-                      padding: const EdgeInsets.all(10.0),
-                    ),
-                  ],
-                ),
-              )],
-          );
-          
-        }
-      ),
+                    ],
+                  ),
+                )
+              ],
+            );
+          }),
     );
   }
 
   Future<bool> _operarioNoValido() {
     return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('Atención:'),
-        content: new Text(
-            'El operario no es válido.\nSeleccione otro.\n' +
-                globals.getMensaje()),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () => Navigator.of(context)
-                .pop(false), // cambiar a false para trabar el back
-            child: new Text('ACEPTAR'),
-          ),
-        ],
-      ),
-    ) ??
+          context: context,
+          builder: (context) => new AlertDialog(
+                title: new Text('Atención:'),
+                content: new Text(
+                    'El operario no es válido.\nSeleccione otro.\n' +
+                        globals.getMensaje()),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () => Navigator.of(context)
+                        .pop(false), // cambiar a false para trabar el back
+                    child: new Text('ACEPTAR'),
+                  ),
+                ],
+              ),
+        ) ??
         false;
   }
 
-Future<bool> _validaOperario(id)  async {
-
-      if (id != 0) {
-        var res = await http.get(
-            Uri.encodeFull(
-                url + '/api/operario/'+ id.toString()),
-            headers: {
-              "Accept": "application/json"
-            });
-        var oper = json.decode(res.body);
-        return oper['activo'] == true;
-      }
+  Future<bool> _validaOperario(id) async {
+    if (id != 0) {
+      var res = await http.get(
+          Uri.encodeFull(url + '/api/operario/' + id.toString()),
+          headers: {"Accept": "application/json"});
+      var oper = json.decode(res.body);
+      return oper['activo'] == true;
+    }
 
     return false;
   }
 }
-
-
-

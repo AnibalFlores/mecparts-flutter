@@ -32,8 +32,6 @@ class _PrefsPageState extends State<PrefsPage> {
     prefs.getNroTerminal().then((n) {
       nroterminal = n;
     });
-
-
   }
 
   @override
@@ -60,7 +58,9 @@ class _PrefsPageState extends State<PrefsPage> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: <Widget>[
                               new TextFormField(
-                                initialValue: nroterminal==null? "" : nroterminal.toString(),
+                                initialValue: nroterminal == null
+                                    ? ""
+                                    : nroterminal.toString(),
                                 decoration: new InputDecoration(
                                     labelText: "Ingrese el número de terminal"),
                                 keyboardType: TextInputType.number,
@@ -78,7 +78,7 @@ class _PrefsPageState extends State<PrefsPage> {
                                 },
                               ),
                               new TextFormField(
-                                initialValue: url==null?"http://": url,
+                                initialValue: url == null ? "http://" : url,
                                 decoration: new InputDecoration(
                                     labelText: "Ingrese la Url del server"),
                                 keyboardType: TextInputType.url,
@@ -120,7 +120,7 @@ class _PrefsPageState extends State<PrefsPage> {
                                       onChanged: (bool value) {
                                         setState(() {
                                           luz = value;
-                                          _tema = luz?'claro':'oscuro';
+                                          _tema = luz ? 'claro' : 'oscuro';
                                         });
 
                                         if (value) {
@@ -151,10 +151,17 @@ class _PrefsPageState extends State<PrefsPage> {
                                         if (_formKey.currentState.validate()) {
                                           // If the form is valid, we want to show a Snackbar
                                           Scaffold.of(context).showSnackBar(
-                                              SnackBar(action: SnackBarAction(textColor: Colors.white, disabledTextColor: Colors.orange,
-                                                  label: 'OK', onPressed: Scaffold.of(context).hideCurrentSnackBar),
+                                              SnackBar(
+                                                  action: SnackBarAction(
+                                                      textColor: Colors.white,
+                                                      disabledTextColor:
+                                                          Colors.orange,
+                                                      label: 'OK',
+                                                      onPressed: Scaffold.of(
+                                                              context)
+                                                          .hideCurrentSnackBar),
                                                   content: Text(
-                                                      'Guardando preferencias...')));
+                                                      'Preferencias guardadas. Puede ser necesario reiniciar.')));
                                           _formKey.currentState.save();
                                         }
                                       }))

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -43,6 +44,7 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
         body: {
           // aca resguardamos los valores globales o por defecto del terminal
           "estado": defineEstado(),
+          "iniciolabor": globals.iniciolabor.toIso8601String(),
           "maquinaactual": globals.maquinaId.toString(),
           "maquinaname": globals.maquinaName,
           "operarioactual": globals.operarioId.toString(),
@@ -72,36 +74,34 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
   }
 
   saltaRuta() async {
-    if (!globals.esmaquina) {
-      ruta = '/operando';
-      await salvaEvento('OPE');
+    if (globals.espap) {
+      ruta = '/pap';
+      await salvaEvento('PAP');
     } else {
-      if (globals.espap && globals.esmaquina) {
-        ruta = '/pap';
-        await salvaEvento('PAP');
-      } else{
-      ruta = '/mecanizando';
-      await salvaEvento('MEC');
+      if (globals.esmaquina) {
+        ruta = '/mecanizando';
+        await salvaEvento('MEC');
+      } else {
+        ruta = '/operando';
+        await salvaEvento('OPE');
+      }
     }
-    }
-
     Navigator.of(context).pushNamed(ruta);
   }
 
-  // Guardamos evento PAP el datetime lo pone el server
+  // Guardamos evento el datetime de inicio lo pone el server
   Future salvaEvento(String titulo) async {
     if (globals.nroLabor != 0) {
-      var res = await http.post(
-          Uri.encodeFull(
-              url + '/api/eventonuevo/'),
-          headers: {
-            "Accept": "application/json"
-          },
-          body: {
-            "nombre": titulo,
-            "laborid": globals.nroLabor.toString(),
-          } );
-      return res.body;
+      var res =
+          await http.post(Uri.encodeFull(url + '/api/eventonuevo/'), headers: {
+        "Accept": "application/json"
+      }, body: {
+        "nombre": titulo,
+        "laborid": globals.nroLabor.toString(),
+      });
+      var event = json.decode(res.body);
+      globals.inicioevento = DateTime.parse(event['inicio']);
+      return event;
     }
   }
 
@@ -162,8 +162,7 @@ class _NroOrdenPageState extends State<NroOrdenPage> {
                                         padding: const EdgeInsets.all(15.0),
                                         child: RaisedButton(
                                           padding: const EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                              horizontal: 25.0),
+                                              vertical: 10.0, horizontal: 25.0),
                                           onPressed: () {
                                             Navigator.of(context).pop();
                                           },

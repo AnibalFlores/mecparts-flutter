@@ -5,7 +5,8 @@ class Globals {
   // TODO Status deberia ser un stream
   int maquinaId = 0;
   String maquinaName = '';
-  DateTime inicio;
+  DateTime iniciolabor;
+  DateTime inicioevento;
   int operarioId = 0;
   String operarioName = '';
   bool esmaquina = false;
